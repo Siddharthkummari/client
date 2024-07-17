@@ -11,7 +11,7 @@ import "./Analyze.css";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57', '#ffa07a', '#fa8072'];
 
-const apiURL = 'http://localhost:4000';
+const apiURL = `${import.meta.env.VITE_API_URL}`;
 
 const getEmojiForMood = (mood) => {
     const moodEmojis = {

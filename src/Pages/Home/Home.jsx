@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Container, Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import './Home.css';
 
-const apiUrl = 'http://localhost:4000';
+const apiUrl = `${import.meta.env.VITE_API_URL}`;
 
 
 const Home = ({ username, setUsername, room, setRoom,  activitystatus, setActivitystatus, leftstatus, setLeftstatus }) => {

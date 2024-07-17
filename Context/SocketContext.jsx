@@ -1,6 +1,6 @@
 import React from 'react';
 import io from "socket.io-client"; 
-const url = "http://localhost:4000";
+const url =`${import.meta.env.VITE_API_URL}`;
 export const socket = io.connect(url, { 
     reconnection:true,
     reconnectionDelay: 500,

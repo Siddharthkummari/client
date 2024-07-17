@@ -15,7 +15,7 @@ import './Chatpage.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 
-const apiURL = 'http://localhost:4000';
+const apiURL =`${import.meta.env.VITE_API_URL}`;
 const INACTIVITY_TIME_LIMIT =  15 *60 * 1000; 
 const TOKEN_RENEWAL_INTERVAL = 14 *60 * 1000;  
 const INACTIVITY_WARNING_TIME = 60* 1000;  
