@@ -1,7 +1,7 @@
 import React from 'react';
 import io from "socket.io-client"; 
 
-const url = `${import.meta.env.VITE_SOCKET_URL}`;
+const url = "https://kawvghenhb.ap-south-1.awsapprunner.com";
 export const socket = io(url, { 
     reconnection: true,
     reconnectionDelay: 500,
