@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       sourcemap: true,
+      chunkSizeWarningLimit: 1000
     },
     resolve: {
       alias: {
