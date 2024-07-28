@@ -21,6 +21,7 @@
 }
 
 .input-container {
+  display:flex;
   margin-top: 0;
   padding: 10px;
   background-color: #f8f9fa;
@@ -30,6 +31,11 @@
   left: 0;
   right: 0;
   z-index: 1000;
+}
+
+.emoji-image .btn-link
+{
+  text-decoration: none !important;
 }
 
 .input-container form {
@@ -46,6 +52,13 @@
 .input-container .btn {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+}
+
+.emoji-picker {
+  position: absolute;
+  bottom: 60px; /* Adjust as needed */
+  left: 10px; /* Align with input */
+  z-index: 999;
 }
 
 .option-container {
@@ -106,8 +119,6 @@
   border: 0.3rem solid white;
   font-size: 2rem;
 }
-
-
 
 @media (max-width: 576px) {
   .scroll-to-bottom {
