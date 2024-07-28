@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useContext } from 'react';
 import { SocketContext } from '../../../Context/SocketContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Container, Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
@@ -11,11 +11,11 @@ import './Home.css';
 const apiUrl = `${import.meta.env.VITE_API_URL}`;
 
 
-const Home = ({ username, setUsername, room, setRoom,  activitystatus, setActivitystatus, leftstatus, setLeftstatus }) => {
+const Home = ({ username, setUsername, room, setRoom,  activitystatus, setActivitystatus,leftstatus,setLeftstatus }) => {
     const navigate = useNavigate();
-    
+    const location=useLocation();
     const socket  = useContext(SocketContext);
-
+    const [reload, setReload] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
     const [isCustomRoom, setIsCustomRoom] = useState(false);
     const [isJoiningExistingRoom, setIsJoiningExistingRoom] = useState(false);
@@ -96,7 +96,7 @@ const Home = ({ username, setUsername, room, setRoom,  activitystatus, setActivi
 
     useEffect(() => {
         if (!activitystatus) {
-            toast.warn('Logged out due to inactivity');
+            toast.warn('Logged out due to inactivity.Wait 5s');
             setActivitystatus(true);
             setTimeout(() => {
                 window.location.reload();
@@ -106,10 +106,12 @@ const Home = ({ username, setUsername, room, setRoom,  activitystatus, setActivi
 
     useEffect(() => {
         if (leftstatus) {
-            window.location.reload();
-            setLeftstatus(false);
+            {
+                setLeftstatus(false);
+                window.location.reload();
+            }
         }
-    }, [leftstatus, setLeftstatus]);
+    }, [leftstatus]);
 
     useEffect(() => {
         // Handle reconnection

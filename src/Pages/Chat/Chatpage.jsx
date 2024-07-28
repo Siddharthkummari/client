@@ -21,7 +21,7 @@ const TOKEN_RENEWAL_INTERVAL = 14 *60 * 1000;
 const INACTIVITY_WARNING_TIME = 60* 1000;  
 
 // eslint-disable-next-line react/prop-types
-function Chatpage({ username, setActivitystatus, setLeftstatus,isConnected}) {
+function Chatpage({ username, setActivitystatus,leftstatus,setLeftstatus,isConnected}) {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [showDrawer, setShowDrawer] = useState(false);
@@ -144,23 +144,21 @@ function Chatpage({ username, setActivitystatus, setLeftstatus,isConnected}) {
 
   const handleLeaveRoom = useCallback(async () => {
     try {
-      socket.emit('leave_room', { username, room });
-      await axios.delete(`${apiURL}/api/chat/logout`,
-        { data: { username, room } },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true
-        }
-      );
-      setLeftstatus(true);
-      navigate('/');
+        socket.emit('leave_room', { username, room });
+        await axios.delete(`${apiURL}/api/chat/logout`, {
+            data: { username, room },
+            headers: {},
+            withCredentials: true
+        });
+
+        // Update this line to force a reload
+        setLeftstatus(true);
+        navigate('/', {replace : true} );
     } catch (error) {
-      toast.error('Failed to leave room. Please try again.');
-      navigate('/');
+        toast.error('Failed to leave room. Please try again.');
+        navigate('/');
     }
-  }, [username, room, setLeftstatus, navigate]);
+}, [username, room, navigate]);
 
   const handleFetchError = useCallback((error) => {
     if (!error.response) {
@@ -289,7 +287,7 @@ function Chatpage({ username, setActivitystatus, setLeftstatus,isConnected}) {
     <Container fluid className="app-container px-0">
       <NavBar roomName={room} onMenuClick={handleDrawerToggle} onLeaveClick={handleLeaveRoom} socket={socket} />
       <SideDrawer show={showDrawer} isConnected={isConnected} onHide={() => setShowDrawer(false)} users={users} />
-      <ActivitySection username={username} messages={messages} setMessages={setMessages} socket={socket} room={room} />
+      <ActivitySection username={username} messages={messages} setMessages={setMessages} socket={socket} room={room} lastActivityRef={lastActivityRef}/>
       <InactivityPopup
         show={showInactivityPopup}
         onStayActive={handleStayActive}

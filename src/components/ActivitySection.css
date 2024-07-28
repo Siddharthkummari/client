@@ -1,13 +1,23 @@
+/* ActivitySection.css */
+
 .activity-section {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  position: relative;
 }
 
 .message-display-section {
   flex-grow: 1;
   overflow-y: auto;
-  margin-bottom: 0 !important;
+  margin-bottom: 60px; /* Ensure space for input container */
+  padding-bottom: 10px;
+}
+
+@media (max-height: 600px) {
+  .message-display-section {
+    height: calc(100vh - 200px);
+  }
 }
 
 .input-container {
@@ -15,6 +25,11 @@
   padding: 10px;
   background-color: #f8f9fa;
   border-top: 1px solid #dee2e6;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .input-container form {
@@ -36,6 +51,15 @@
 .option-container {
   background-color: #f8f9fa;
   padding: 1rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #dee2e6;
 }
 
 .option-container .btn-link {
@@ -58,12 +82,16 @@
   .input-container .btn {
     font-size: 16px; /* Prevent zoom on input focus on iOS */
   }
+
+  .message-display-section {
+    margin-bottom: 50px; /* Ensure space for input container in mobile */
+  }
 }
 
 .scroll-to-bottom {
   position: fixed;
-  bottom: 70px;
-  right: 20px;
+  bottom: 5rem;
+  right: 45rem;
   z-index: 1000;
   background-color: #007bff;
   color: white;
@@ -75,5 +103,29 @@
   align-items: center;
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border: 0.3rem solid white;
+  font-size: 2rem;
 }
 
+
+
+@media (max-width: 576px) {
+  .scroll-to-bottom {
+    position: fixed;
+    bottom: 5rem;
+    right: 11.5rem;
+    z-index: 1000;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border: 0.3rem solid white;
+    font-size: 2rem;
+  }
+}

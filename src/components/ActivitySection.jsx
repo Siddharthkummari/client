@@ -3,6 +3,8 @@ import { Container, Row, Col, Form, Button, Modal } from 'react-bootstrap';
 import Message from './Message';
 import ContextMenu from './ContextMenu';
 import { socket } from '../../Context/SocketContext';
+import './ActivitySection.css'; // Import the CSS file
+
 
 // New component for date separator
 const DateSeparator = ({ date }) => {
@@ -44,7 +46,7 @@ const DateSeparator = ({ date }) => {
   );
 };
 
-function ActivitySection({ username, messages, setMessages, room }) {
+function ActivitySection({ username, messages, setMessages, room}) {
   const [newMessage, setNewMessage] = useState('');
   const [contextMenu, setContextMenu] = useState({ show: false, msgoptions: false, top: 0, left: 0, messageId: null, isOwnMessage: false });
   const [selectionMode, setSelectionMode] = useState(false);
@@ -58,44 +60,7 @@ function ActivitySection({ username, messages, setMessages, room }) {
   const [deleteType, setDeleteType] = useState(null);
   const messageDisplayRef = useRef(null);
 
-  const style_for_option_container = {
-    paddingBottom: "0.1rem",
-    paddingTop: "0.1rem",
-    fontSize: "2rem",
-  };
-
-  const style_for_msg_display = {
-    flexGrow: "1",
-    overflowY: "auto",
-    marginBottom: "0"
-  }
-
-  const style_for_input_container = {
-    marginTop: "0",
-    padding: "10px",
-    backgroundColor: "#f8f9fa",
-    borderTop: "1px solid #dee2e6",
-    marginBottom: "0"
-  }
-
-  const style_for_scroll_bottom = {
-    padding: "1rem",
-    fontSize: "2rem",
-    zIndex: 100000,
-    position: "fixed",
-    bottom: "5rem",
-    left: "50%",
-    transform: "translateX(-50%)",
-    border: "0.3rem solid white",
-    borderRadius: "50%",
-    cursor: "pointer",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    width: "5rem",
-    height: "5rem",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  };
+  
 
   useEffect(() => {
     const messageDisplay = messageDisplayRef.current;
@@ -146,7 +111,8 @@ function ActivitySection({ username, messages, setMessages, room }) {
         timestamp: new Date().toISOString()
       };
       socket.emit("send_message", msgdata);
-      socket.emit("update_activity", { username, room, time: Date.now() })
+      socket.emit("update_activity", { username, room, time: Date.now() });
+      
       setNewMessage('');
     }
   };
@@ -208,14 +174,13 @@ function ActivitySection({ username, messages, setMessages, room }) {
   };
 
   const handleSelectAll = () => {
-    if(messages.length !==0)
-    {
+    if (messages.length !== 0) {
       const allMessageIds = messages.map(msg => msg._id);
-    setSelectedMessages(allMessageIds);
-    setSelectionMode(true);
-    console.log("Selected all messages:", allMessageIds);
+      setSelectedMessages(allMessageIds);
+      setSelectionMode(true);
+      console.log("Selected all messages:", allMessageIds);
     }
-    
+
   };
 
   const handleDeselectAll = () => {
@@ -396,177 +361,169 @@ function ActivitySection({ username, messages, setMessages, room }) {
 
   return (
     <Container
-      fluid
-      className="activity-section"
-      onContextMenu={handleContextMenu}
-      onClick={() => setContextMenu({ show: false, msgoptions: false, top: 0, left: 0, messageId: null, isOwnMessage: false })}
-    >
-      <Row className="message-display-section position-relative" ref={messageDisplayRef} style={style_for_msg_display}>
-        <Col>
-          {messages.map((message, index) => (
-            <React.Fragment key={message._id}>
-              {(index === 0 || hasDateChanged(messages[index - 1], message)) && (
-                <DateSeparator date={formatDate(message.createdAt)} />
-              )}
-              <Message
-                username={username}
-                message={message}
-                isSelectable={selectionMode}
-                isSelected={selectedMessages.includes(message._id)}
-                onSelect={() => handleSelectMessage(message._id)}
-                onMessageOptions={handleMessageOptions}
-              />
-            </React.Fragment>
-          ))}
+    fluid
+    className="activity-section"
+    onContextMenu={handleContextMenu}
+    onClick={() => setContextMenu({ show: false, msgoptions: false, top: 0, left: 0, messageId: null, isOwnMessage: false })}
+  >
+    <Row className="message-display-section position-relative" ref={messageDisplayRef}>
+      <Col>
+        {messages.map((message, index) => (
+          <React.Fragment key={message._id}>
+            {(index === 0 || hasDateChanged(messages[index - 1], message)) && (
+              <DateSeparator date={formatDate(message.createdAt)} />
+            )}
+            <Message
+              username={username}
+              message={message}
+              isSelectable={selectionMode}
+              isSelected={selectedMessages.includes(message._id)}
+              onSelect={() => handleSelectMessage(message._id)}
+              onMessageOptions={handleMessageOptions}
+            />
+          </React.Fragment>
+        ))}
+      </Col>
+    </Row>
+    {hasScrolledUp && (
+      <span
+        className="scroll-to-bottom material-symbols-outlined"
+        onClick={() => {
+          messageDisplayRef.current.scrollTo({ top: messageDisplayRef.current.scrollHeight, behavior: 'smooth' });
+          setHasScrolledUp(false);
+        }}
+      >
+        expand_circle_down
+      </span>
+    )}
+    {selectionMode ? (
+      <Row className="option-container">
+        <Col xs="auto">
+          <Button variant="link" onClick={toggleSelectionMode} title='Close'>
+            <span className="material-symbols-outlined">
+              close
+            </span>
+          </Button>
+        </Col>
+        <Col xs="auto">
+          <Button variant="link" onClick={handleSelectAll} title='SelectAll'>
+            <span className="material-symbols-outlined">
+              select_all
+            </span>
+          </Button>
+        </Col>
+        <Col xs="auto">
+          <Button variant="link" onClick={handleDeselectAll} title='DeSelectAll'>
+            <span className="material-symbols-outlined">
+              deselect
+            </span>
+          </Button>
+        </Col>
+        <Col xs="auto" className="ms-auto">
+          <Button
+            variant="link"
+            onClick={() => {
+              setShowDeleteModal(true);
+              handleDeleteMessages();
+            }}
+            disabled={selectedMessages.length === 0}
+            title='Delete Messages'
+          >
+            <span className="material-symbols-outlined" title='delete' style={{ color: "Red" }}>
+              delete
+            </span>
+          </Button>
         </Col>
       </Row>
-      {hasScrolledUp && (
-        <span
-          className="scroll-to-bottom material-symbols-outlined"
-          onClick={() => {
-            messageDisplayRef.current.scrollTo({ top: messageDisplayRef.current.scrollHeight, behavior: 'smooth' });
-            setHasScrolledUp(false);
-          }}
-          style={style_for_scroll_bottom}
-        >
-          expand_circle_down
-        </span>
-      )}
-      {selectionMode ? (
-        <Row className="option-container" style={style_for_option_container}>
-          <Col xs="auto">
-            <Button variant="link" onClick={toggleSelectionMode} title='Close'>
-              <span className="material-symbols-outlined">
-                close
-              </span>
-            </Button>
-          </Col>
-          <Col xs="auto">
-            <Button variant="link" onClick={handleSelectAll} title='SelectAll'>
-              <span className="material-symbols-outlined">
-                select_all
-              </span>
-            </Button>
-          </Col>
-          <Col xs="auto">
-            <Button variant="link" onClick={handleDeselectAll} title='DeSelectAll'>
-              <span className="material-symbols-outlined">
-                deselect
-              </span>
-            </Button>
-          </Col>
-          <Col xs="auto" className="ms-auto">
-            <Button
-              variant="link"
-              onClick={() => {
-                setShowDeleteModal(true);
-                handleDeleteMessages();
-              }}
-              disabled={selectedMessages.length === 0}
-              title='Delete Messages'
-            >
-              <span className="material-symbols-outlined" title='delete' style={{ color: "Red" }}>
-                delete
-              </span>
-            </Button>
-          </Col>
-        </Row>
-      ) : (
-        <Row className="input-container mt-auto" style={style_for_input_container}>
-          <Col className="p-0">
-            <Form onSubmit={handleMessageSend} className="d-flex">
-              <Form.Control
-                type="text"
-                placeholder="Type your message..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                className="flex-grow-1 rounded-0 border-0"
-              />
-              <Button
-                variant="success"
-                type="submit"
-                className="d-flex justify-content-center align-items-center rounded-0"
-              >
-                <span className="material-symbols-outlined">
-                  send
-                </span>
-              </Button>
-            </Form>
-          </Col>
-        </Row>
-      )}
-      <ContextMenu
-        show={contextMenu.show}
-        msgoptions={contextMenu.msgoptions}
-        top={contextMenu.top}
-        left={contextMenu.left}
-        onSelect={handleSelectOption}
-        onClose={() => setContextMenu({ show: false, msgoptions: false, top: 0, left: 0, messageId: null, isOwnMessage: false })}
-        hasSentByMe={contextMenu.isOwnMessage}
-        messageId={contextMenu.messageId}
-        containerRef={messageDisplayRef}
-      />
-      <Modal show={showEditModal} onHide={() => {
-        setShowEditModal(false);
-        setEditingMessageId(null);
-        setEditedMessage('');
-      }}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Message</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleEditSubmit}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>Previous Message:</Form.Label>
-              <Form.Text className="d-block mb-2">{to_be_edited}</Form.Text>
-              <Form.Label>Enter New Message:</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Type your new message..."
-                value={editedMessage}
-                onChange={(e) => setEditedMessage(e.target.value)}
-                autoFocus
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => {
-              setShowEditModal(false);
-              setEditingMessageId(null);
-              setEditedMessage('');
-            }}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Save Changes
-            </Button>
-          </Modal.Footer>
+    ) : (
+      <div className="input-container">
+        <Form onSubmit={handleMessageSend}>
+          <Form.Control
+            type="text"
+            placeholder="Type your message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+          <Button variant="success" type="submit">
+            <span className="material-symbols-outlined">
+              send
+            </span>
+          </Button>
         </Form>
-      </Modal>
-
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Delete Messages</Modal.Title>
-        </Modal.Header>
+      </div>
+    )}
+    <ContextMenu
+      show={contextMenu.show}
+      msgoptions={contextMenu.msgoptions}
+      top={contextMenu.top}
+      left={contextMenu.left}
+      onSelect={handleSelectOption}
+      onClose={() => setContextMenu({ show: false, msgoptions: false, top: 0, left: 0, messageId: null, isOwnMessage: false })}
+      hasSentByMe={contextMenu.isOwnMessage}
+      messageId={contextMenu.messageId}
+      containerRef={messageDisplayRef}
+    />
+    <Modal show={showEditModal} onHide={() => {
+      setShowEditModal(false);
+      setEditingMessageId(null);
+      setEditedMessage('');
+    }}>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Message</Modal.Title>
+      </Modal.Header>
+      <Form onSubmit={handleEditSubmit}>
         <Modal.Body>
-          <p>Are you sure you want to delete the selected messages?</p>
+          <Form.Group className="mb-3">
+            <Form.Label>Previous Message:</Form.Label>
+            <Form.Text className="d-block mb-2">{to_be_edited}</Form.Text>
+            <Form.Label>Enter New Message:</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Type your new message..."
+              value={editedMessage}
+              onChange={(e) => setEditedMessage(e.target.value)}
+              autoFocus
+            />
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+          <Button variant="secondary" onClick={() => {
+            setShowEditModal(false);
+            setEditingMessageId(null);
+            setEditedMessage('');
+          }}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={() => confirmDelete('me')}>
-            Delete for Me
+          <Button variant="primary" type="submit">
+            Save Changes
           </Button>
-          {(deleteType === 'sentByMe') && (
-            <Button variant="danger" onClick={() => confirmDelete('everyone')}>
-              Delete for Everyone
-            </Button>
-          )}
         </Modal.Footer>
-      </Modal>
-    </Container>
-  );
+      </Form>
+    </Modal>
+
+    <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Delete Messages</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>Are you sure you want to delete the selected messages?</p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+          Cancel
+        </Button>
+        <Button variant="danger" onClick={() => confirmDelete('me')}>
+          Delete for Me
+        </Button>
+        {(deleteType === 'sentByMe') && (
+          <Button variant="danger" onClick={() => confirmDelete('everyone')}>
+            Delete for Everyone
+          </Button>
+        )}
+      </Modal.Footer>
+    </Modal>
+  </Container>
+);
 }
 
 export default ActivitySection;

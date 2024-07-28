@@ -1,7 +1,7 @@
 import React from 'react';
 import io from "socket.io-client"; 
 
-const url = "https://devrooms-manit.onrender.com";
+const url = import.meta.env.VITE_API_URL;
 export const socket = io(url, { 
     reconnection: true,
     reconnectionDelay: 500,
