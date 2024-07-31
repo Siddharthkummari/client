@@ -8,7 +8,8 @@ const Message = ({
   isSelectable,
   isSelected,
   onSelect,
-  onMessageOptions
+  onMessageOptions,
+  onReply,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const isOwnMessage = message.username === username;
@@ -25,7 +26,7 @@ const Message = ({
     position: 'relative',
     wordWrap: 'break-word',
     overflowWrap: 'break-word',
-    maxWidth: '80%', // Adjust this value as needed
+    maxWidth: '80%',
   };
 
   const formatTimestamp = (timestamp) => {
@@ -49,8 +50,14 @@ const Message = ({
       <>
         <div>{message.message}</div>
         <div className="message-metadata">
-          {message?.edited && <span className="message-edited" style={style_for_edited}>(edited)</span>}
-          <span className="message-timestamp" style={style_for_edited}>{formattedTimestamp}</span>
+          {message?.edited && (
+            <span className="message-edited" style={style_for_edited}>
+              (edited)
+            </span>
+          )}
+          <span className="message-timestamp" style={style_for_edited}>
+            {formattedTimestamp}
+          </span>
         </div>
       </>
     );
@@ -66,6 +73,11 @@ const Message = ({
   const handleOptionsClick = (e) => {
     e.stopPropagation();
     onMessageOptions(e, message._id, isOwnMessage);
+  };
+
+  const handleReplyClick = (e) => {
+    e.stopPropagation();
+    onReply(message);
   };
 
   return (
@@ -94,11 +106,14 @@ const Message = ({
               right: '2px',
               cursor: 'pointer'
             }}
-            onClick={handleOptionsClick}
           >
-            <ChevronDown size={16} color="#666" />
+            <div onClick={handleOptionsClick}>
+              <ChevronDown size={16} color="#666" />
+            </div>
+
           </div>
         )}
+
       </div>
     </div>
   );

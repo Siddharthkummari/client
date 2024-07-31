@@ -26,7 +26,8 @@ function Chatpage({ username, setActivitystatus,leftstatus,setLeftstatus,isConne
   const [users, setUsers] = useState([]);
   const [showDrawer, setShowDrawer] = useState(false);
   const [showInactivityPopup, setShowInactivityPopup] = useState(false);
-  const { room } = useParams();
+  const [isAdmin, setIsAdmin] = useState(sessionStorage.getItem('isAdmin')||false);
+  const [isLocked, setIsLocked] = useState(sessionStorage.getItem('isLocked') === 'true');  const { room } = useParams();
   const navigate = useNavigate();
   const inactivityTimerRef = useRef(null);
   const inactivityWarningTimerRef = useRef(null);
@@ -65,8 +66,35 @@ function Chatpage({ username, setActivitystatus,leftstatus,setLeftstatus,isConne
     }
   }, [username, room]);
 
+  useEffect(()=>{
+    socket.emit("update_activity", { username, room, time: Date.now() });
+    return()=>{
+      socket.off("update_activity");
+    }
+  },[])
 
 
+  // Function to handle lock toggle
+  const handleLockToggle = () => {
+    const newLockedState = !isLocked;
+    setIsLocked(newLockedState);
+    sessionStorage.setItem('isLocked', newLockedState.toString());
+    socket.emit('toggle_room_lock', { room, locked: newLockedState });
+  };
+  
+
+  useEffect(() => {
+    if (room && username) {
+      socket.emit('check_admin_status', { username, room }, (response) => {
+        setIsAdmin(response.isAdmin);
+        sessionStorage.setItem('isAdmin', response.isAdmin);
+      });
+      
+    }
+    return () => {
+      socket.off('admin_status_update');
+    };
+  }, [room, username]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -256,6 +284,13 @@ function Chatpage({ username, setActivitystatus,leftstatus,setLeftstatus,isConne
     };
 
     socket.on('chatroom_users', handleUserslist);
+    socket.once('admin_status',({username,Admin})=>{
+      
+        toast.success(`You are now an admin`);
+        setIsAdmin(isAdmin);
+        sessionStorage.setItem('isAdmin', Admin);
+      
+    })
     socket.once('welcome_message', (message) => {
       toast.success(message.message);
     });
@@ -268,6 +303,8 @@ function Chatpage({ username, setActivitystatus,leftstatus,setLeftstatus,isConne
       }
     });
 
+    
+
     socket.on('reconnect_error', (error) => {
       toast.error(`Reconnection error: ${error}`);
     });
@@ -278,15 +315,35 @@ function Chatpage({ username, setActivitystatus,leftstatus,setLeftstatus,isConne
       socket.off('chatroom_users', handleUserslist);
       socket.off('welcome_message');
       socket.off('system_message');
+      socket.off('admin_status');
       socket.off('reconnect');
+      socket.off('user_removed_by_admin');
       socket.off('reconnect_error');
     };
   }, [socket, username, room]);
 
+  useEffect(()=>{
+    socket.once("user_removed_by_admin", () => {
+      
+      
+      navigate("/",{state:{errorMsg:"You have been removed from the room by the admin"}});
+    });
+    return ()=>{
+      socket.off("user_removed_by_admin");
+    }
+  },[socket]);
+
   return (
     <Container fluid className="app-container px-0">
-      <NavBar roomName={room} onMenuClick={handleDrawerToggle} onLeaveClick={handleLeaveRoom} socket={socket} />
-      <SideDrawer show={showDrawer} isConnected={isConnected} onHide={() => setShowDrawer(false)} users={users} />
+      <NavBar 
+        roomName={room} 
+        onMenuClick={handleDrawerToggle} 
+        onLeaveClick={handleLeaveRoom}
+        isAdmin={isAdmin}
+        isLocked={isLocked}
+        onLockToggle={handleLockToggle}
+      />
+      <SideDrawer show={showDrawer} isConnected={isConnected} onHide={() => setShowDrawer(false)} users={users} isAdmin={isAdmin} username= {username} room={room} />
       <ActivitySection username={username} messages={messages} setMessages={setMessages} socket={socket} room={room} lastActivityRef={lastActivityRef}/>
       <InactivityPopup
         show={showInactivityPopup}

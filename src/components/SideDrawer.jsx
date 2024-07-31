@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Offcanvas, Form, ListGroup } from 'react-bootstrap';
+import { Offcanvas, Form, ListGroup, Button } from 'react-bootstrap';
+import { Ban } from 'lucide-react';
 import './SideDrawer.css';
 import { socket } from '../../Context/SocketContext';
 
-function SideDrawer({ show, onHide, users }) {
+function SideDrawer({ show, onHide, users, isAdmin,username ,room}) {
     const [searchTerm, setSearchTerm] = useState('');
     const [isConnected, setIsConnected] = useState(socket.connected);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -62,6 +63,14 @@ function SideDrawer({ show, onHide, users }) {
         };
     }, [updateConnectionStatus]);
 
+    const handleMakeAdmin = (username) => {
+        socket.emit('make_admin', { username, room });
+    };
+
+    const handleBanUser = (username) => {
+        socket.emit('remove_user_by_admin', { username, room });
+    };
+
     return (
         <Offcanvas show={show} onHide={onHide} placement="start">
             <Offcanvas.Header closeButton>
@@ -86,7 +95,30 @@ function SideDrawer({ show, onHide, users }) {
                 </Form>
                 <ListGroup className="flex-grow-1 overflow-auto">
                     {filteredUsers.map((user, index) => (
-                        <ListGroup.Item key={index}>{user.username}</ListGroup.Item>
+                        <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
+                            <div>
+                                {user.username}
+                            </div>
+                            <div>
+                                {isAdmin && user.username !== username && (
+                                    <>
+                                        <Button
+                                            variant="outline-primary"
+                                            size="sm"
+                                            onClick={() => handleMakeAdmin(user.username)}>
+                                            Make Admin
+                                        </Button>
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            className="ms-2"
+                                            onClick={() => handleBanUser(user.username)}>
+                                            <Ban size={16} />
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </ListGroup.Item>
                     ))}
                 </ListGroup>
             </Offcanvas.Body>

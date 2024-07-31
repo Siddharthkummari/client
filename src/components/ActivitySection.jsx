@@ -3,7 +3,8 @@ import { Container, Row, Col, Form, Button, Modal } from 'react-bootstrap';
 import Message from './Message';
 import ContextMenu from './ContextMenu';
 import { socket } from '../../Context/SocketContext';
-import EmojiPicker from 'emoji-picker-react'; // Import the emoji picker
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
 import './ActivitySection.css'; // Import the CSS file
 
 const DateSeparator = ({ date }) => {
@@ -63,6 +64,7 @@ function ActivitySection({ username, messages, setMessages, room }) {
   const [deleteType, setDeleteType] = useState(null);
   const [emojiPickerVisible, setEmojiPickerVisible] = useState(false); // State to toggle emoji picker
   const messageDisplayRef = useRef(null);
+  const [pinnedMessages, setPinnedMessages] = useState([]);
 
   useEffect(() => {
     const messageDisplay = messageDisplayRef.current;
@@ -120,11 +122,9 @@ function ActivitySection({ username, messages, setMessages, room }) {
     }
   };
 
-  const onEmojiClick = (event, emojiObject) => {
-    if (emojiObject && emojiObject.emoji) {
-      setNewMessage((prevMessage) => prevMessage + emojiObject.emoji);
-      setEmojiPickerVisible(false);
-    }
+  const onEmojiSelect = (emoji) => {
+    setNewMessage((prevMessage) => prevMessage + emoji.native);
+    setEmojiPickerVisible(false);
   };
 
   const handleMessageReceive = (data) => {
@@ -370,9 +370,9 @@ function ActivitySection({ username, messages, setMessages, room }) {
       prevDate.toDateString() !== currDate.toDateString();
   };
 
-  const addEmoji = (emoji) => {
-    setNewMessage(prev => prev + emoji.native); // Add emoji to the message input
-    setShowEmojiPicker(false); // Hide the emoji picker after selecting an emoji
+  const addEmoji = (emojiObject) => {
+    setNewMessage(prev => prev + emojiObject.emoji);
+    setEmojiPickerVisible(false); // Note: changed from setShowEmojiPicker to setEmojiPickerVisible to match the state variable name
   };
 
 
@@ -416,11 +416,46 @@ function ActivitySection({ username, messages, setMessages, room }) {
       {selectionMode ? (
         <Row className="option-container">
           {/* Option buttons */}
-        </Row>
+          <Col xs="auto">
+            <Button variant="link" onClick={toggleSelectionMode} title='Close'>
+              <span className="material-symbols-outlined">
+                close
+              </span>
+            </Button>
+          </Col>
+          <Col xs="auto">
+            <Button variant="link" onClick={handleSelectAll} title='SelectAll'>
+              <span className="material-symbols-outlined">
+                select_all
+              </span>
+            </Button>
+          </Col>
+          <Col xs="auto">
+            <Button variant="link" onClick={handleDeselectAll} title='DeSelectAll'>
+              <span className="material-symbols-outlined">
+                deselect
+              </span>
+            </Button>
+          </Col>
+          <Col xs="auto" className="ms-auto">
+            <Button
+              variant="link"
+              onClick={() => {
+                setShowDeleteModal(true);
+                handleDeleteMessages();
+              }}
+              disabled={selectedMessages.length === 0}
+              title='Delete Messages'
+            >
+              <span className="material-symbols-outlined" title='delete' style={{ color: "Red" }}>
+                delete
+              </span>
+            </Button>
+          </Col>        </Row>
       ) : (
         <div className="input-container">
-          <Button variant="link" onClick={() => setEmojiPickerVisible(!emojiPickerVisible)} title='Add Emoji' style = {style_for_emoji_button} >
-              <span className="emoji-image">😊</span>
+          <Button variant="link" onClick={() => setEmojiPickerVisible(!emojiPickerVisible)} title='Add Emoji' style={style_for_emoji_button}>
+            <span className="emoji-image">😊</span>
           </Button>
           <Form onSubmit={handleMessageSend}>
             <Form.Control
@@ -434,10 +469,15 @@ function ActivitySection({ username, messages, setMessages, room }) {
                 send
               </span>
             </Button>
-            
+
             {emojiPickerVisible && (
               <div className="emoji-picker">
-                <EmojiPicker onEmojiClick={onEmojiClick} />
+                <Picker
+                  data={data}
+                  onEmojiSelect={onEmojiSelect}
+                  theme="light"
+                  set="native"
+                />
               </div>
             )}
           </Form>

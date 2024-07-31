@@ -37,6 +37,7 @@ function ContextMenu({ show, msgoptions, top, left, onSelect, onClose, hasSentBy
         { key: 'select', label: 'Select' },
         { key: 'delete', label: 'Delete' },
         ...(hasSentByMe ? [{ key: 'edit', label: 'Edit' }] : []),
+        
       ]
     : [
         { key: 'select', label: 'Select' },
@@ -44,7 +45,6 @@ function ContextMenu({ show, msgoptions, top, left, onSelect, onClose, hasSentBy
         { key: 'deselectAll', label: 'Deselect All' },
         { key: 'clearChat', label: 'Clear Chat' },
         { key: 'Analyze', label: 'MyMood' },
-        { key: 'Analyze Room',label : 'Analyze Room'}
       ];
 
   return (
